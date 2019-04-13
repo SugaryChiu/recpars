@@ -36,7 +36,7 @@
             <v-layout column align-center>
                 <v-flex class="mt-5">
                     <v-avatar size="100">
-                        <img src="/profile.jpeg">
+                        <img src="profile1.jpeg">
                     </v-avatar>
 
                     <p class="white--text subheading mt-1">

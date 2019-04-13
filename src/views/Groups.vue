@@ -35,7 +35,7 @@ export default {
   data(){
     return{
         groups: [
-            { name: 'Runjia Zhao', direction: 'Cognitive science', avatar: 'profile.jpeg' },
+            { name: 'Runjia Zhao', direction: 'Cognitive science', avatar: 'profile1.jpeg' },
             { name: 'MRI group', direction: 'Medical imaging', avatar: 'MRI.png' },
             { name: 'Psychology group', direction: 'Developmental psychology', avatar: 'baby.jpeg' },
         ]

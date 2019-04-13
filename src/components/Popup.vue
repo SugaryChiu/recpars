@@ -12,7 +12,7 @@
                     <v-text-field label="Compensation" v-model="compensation" prepend-icon="money" :rules="inputRules"></v-text-field>
                     <v-menu>
                         <v-text-field :rules="inputRules" :value="formattedDate" slot="activator" label="Date" prepend-icon="date_range"></v-text-field>
-                        <v-date-picker v-model="due"></v-date-picker>
+                        <v-date-picker v-model="date"></v-date-picker>
                     </v-menu>
 
                     <v-spacer></v-spacer>
@@ -50,7 +50,7 @@ export default {
                 const study = {
                     title: this.title,
                     content: this.content,
-                    date: format(this.due, 'Do MMM YYYY'),
+                    date: format(this.date, 'Do MMM YYYY'),
                     group: 'Runjia Zhao',
                     compensation: 'high',
                 }
@@ -65,7 +65,7 @@ export default {
     },
     computed: {
         formattedDate(){
-            return this.due ? format(this.due,'Do MMM YYYY') : ''
+            return this.date ? format(this.date,'Do MMM YYYY') : ''
         }
     }
 }

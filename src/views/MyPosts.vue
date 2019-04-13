@@ -27,9 +27,9 @@ export default {
     }
   },
   computed: {
-    myProjects(){
+    myPosts(){
       return this.studies.filter(study => {
-        return post.group === 'Runjia Zhao'
+        return study.group === 'Runjia Zhao'
       })
     }
   },
@@ -39,7 +39,7 @@ export default {
 
       changes.forEach(change => {
         if(change.type == 'added'){
-          this.projects.push({
+          this.studies.push({
             ...change.doc.data(),
             id: change.doc.id
           })

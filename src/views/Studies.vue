@@ -1,5 +1,5 @@
 <template>
-  <div class="dashboard">
+  <div class="studies">
     <h1 class="subheading primary--text">Recruiting studies</h1>
       <v-container class="my-5">
 
@@ -79,13 +79,13 @@ export default {
 </script>
 
 <style>
-.project.high{
+.study.high{
   border-left: 4px solid #3cd1c2;
 }
-.project.medium{
+.study.medium{
   border-left: 4px solid orange;
 }
-.project.low{
+.study.low{
   border-left: 4px solid tomato;
 }
 .v-chip.high{
