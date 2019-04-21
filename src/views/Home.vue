@@ -30,9 +30,9 @@
                         <v-carousel active-class height="600" interval="2000">
                             <v-carousel-item v-for="story in stories" :key="story.title" :src="story.src" cycle="true">
                                 <v-sheet color="rgb(0,0,0,0.2)" fill-height>
-                                    <sheet-footer class="white--text">
+                                    <!-- <sheet-footer class="white--text"> -->
                                         <span class="heading display-1 ml-1">{{ story.title }}</span>                                        
-                                    </sheet-footer>
+                                    <!-- </sheet-footer> -->
                                 </v-sheet>
                             </v-carousel-item>
                         </v-carousel>
