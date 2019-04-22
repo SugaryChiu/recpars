@@ -31,6 +31,17 @@ export default new Router({
       path: '/groups',
       name: 'groups',
       component: Groups
+    },
+    {
+      // different way of importing
+      path: '/join',
+      name: 'join',
+      component: () => import('./views/Join.vue')
+    },
+    {
+      path: '/signin',
+      name: 'signin',
+      component: () => import('./views/Signin.vue')
     }
   ]
 })

@@ -1,6 +1,5 @@
 <template>
     <nav>
-
         <v-snackbar v-model="snackbar" :timeout="4000" top color="success">
             <span>Congratulations! Your study has been posted!</span>
             <v-btn flat color="white" @click="snackbar=false">Close</v-btn>
@@ -26,7 +25,11 @@
                 </v-list>
             </v-menu>
 
-            <v-btn flat color="primary">
+            <v-btn v-if="!isAuthenticated" flat color="primary" to="/signin">
+                <span>Sign in</span>
+                <v-icon right>person_add</v-icon>
+            </v-btn>
+            <v-btn v-else flat color="primary" @click="logout">
                 <span>Sign Out</span>
                 <v-icon right>exit_to_app</v-icon>
             </v-btn>
@@ -36,11 +39,11 @@
             <v-layout column align-center>
                 <v-flex class="mt-5">
                     <v-avatar size="100">
-                        <img src="profile1.jpeg">
+                        <img :src="getProfilePhotoUrl()">
                     </v-avatar>
 
-                    <p class="white--text subheading mt-1">
-                        Runjia Zhao
+                    <p class="white--text subheading mt-1 text-xs-center">
+                        {{getProfileName()}}
                     </p>
                 </v-flex>
                 <v-flex class="mt-4 mb-3">
@@ -63,6 +66,7 @@
 
 <script>
 import Popup from './Popup'
+import firebase from 'firebase'
 export default {
     components: { Popup },
     data(){
@@ -76,5 +80,49 @@ export default {
             ],
             snackbar: false         
         }
+    },
+    computed: {
+        isAuthenticated() {
+            return this.$store.getters.isAuthenticated;
+        },
+
+    },
+    methods: {
+        logout() {
+            this.$store.dispatch('userSignOut');
+        },
+        getProfilePhotoUrl() {
+            var profileSrc = "";
+            if(this.isAuthenticated){
+                var user = firebase.auth().currentUser;
+                if (user != null) {
+                    if (user.photoURL != "" && user.photoURL != null) {
+                        profileSrc = user.photoURL;
+                    } else {
+                        profileSrc = "profile_default.png";
+                    }
+                } else {
+                    profileSrc =  "profile_default.png";
+                }
+            } else {
+                profileSrc = "profile_default.png";
+            }
+            return profileSrc;
+        },
+        getProfileName() {
+            var displayName = "";
+            if(this.isAuthenticated){
+                var user = firebase.auth().currentUser;
+                if(user != null){
+                    displayName = user.displayName;
+                } else {
+                    displayName = "Visitor";
+                }
+            } else {
+                displayName = "Guest";
+            }
+            return displayName;
+        }                        
     }
+
 }</script>
