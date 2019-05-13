@@ -17,6 +17,9 @@
                             <v-text-field prepend-icon="person" name="name" label="Name" id="name"
                                           type="name" required v-model="name" :rules="nameRules">
                             </v-text-field>
+                            <v-text-field prepend-icon="school" name="direction" label="Direction" id="direction"
+                                          type="direction" v-model="direction">
+                            </v-text-field>
                             <v-flex>
                                 <img :src="imageUrl" height="150" v-if="imageUrl"/>
                                 <v-text-field prepend-icon='attach_file' name = "picture" label="Select Profile Picture" id="picture"
@@ -54,6 +57,7 @@ export default {
             email: '',
             password: '',
             name: '',
+            direction: '',
             imageUrl: '',
             imageName: '',
             imageFile: '',
@@ -104,6 +108,7 @@ export default {
                     email: this.email,
                     password: this.password,
                     displayName: this.name,
+                    direction: this.direction,
                     photoFile: this.imageFile
                 });
             }

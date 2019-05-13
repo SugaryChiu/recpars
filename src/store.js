@@ -1,6 +1,7 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 import firebase from 'firebase'
+import db from '@/fb'
 import router from '@/router'
 
 Vue.use(Vuex)
@@ -8,7 +9,9 @@ Vue.use(Vuex)
 export default new Vuex.Store({
     state: {
         user: null,
-        isAuthenticated: false
+        isAuthenticated: false,
+        displayName: "",
+        photoUrl: "profile_default.png"
     },
     mutations: {
         setUser(state, payload) {
@@ -17,23 +20,44 @@ export default new Vuex.Store({
         setIsAuthenticated(state, payload) {
             state.isAuthenticated = payload;
         },
+        setPhotoUrl(state, payload) {
+            state.photoUrl = payload;
+        },
+        resetPhotoUrl(state) {
+            state.photoUrl = "profile_default.png";
+        },
+        setDisplayName(state, payload) {
+            state.displayName = payload;
+        },
+        resetDisplayName(state) {
+            state.displayName = "";
+        }
     },
     actions: {
-        userJoin({ commit }, { email, password, displayName, photoFile }) {
+        userJoin({ commit }, { email, password, displayName, direction, photoFile }) {
             firebase
                 .auth()
                 .createUserWithEmailAndPassword(email, password)
                 .then(user => {
                     commit('setUser', user);
                     commit('setIsAuthenticated', true);
-                    updateUserProfile(displayName, photoFile);
+                    updateUserProfile(this, displayName, direction, photoFile);
                     router.push('/myposts');
                 })
-                .catch(() => {
-                    commit('setUser', null);
-                    commit('setIsAuthenticated', false);
-                    router.push('/');
-                });
+                // .catch(() => {
+                //     commit('setUser', null);
+                //     commit('setIsAuthenticated', false);
+                //     router.push('/');
+                // })
+                ;
+        },
+        userInfoComplete({ commit }, { photoUrl, displayName }) {
+            commit('setPhotoUrl', photoUrl);
+            commit('setDisplayName', displayName);
+        },
+        userInfoClear({ commit }) {
+            commit('resetPhotoUrl');
+            commit('resetDisplayName');
         },
         userLogin({ commit }, { email, password }) {
             firebase
@@ -42,13 +66,15 @@ export default new Vuex.Store({
                 .then(user => {
                     commit('setUser', user);
                     commit('setIsAuthenticated', true);
+                    queryUserProfile(this);
                     router.push('/myposts');
                 })
-                .catch(() => {
-                    commit('setUser', null);
-                    commit('setIsAuthenticated', false);
-                    router.push('/');
-                });
+                // .catch(() => {
+                //     commit('setUser', null);
+                //     commit('setIsAuthenticated', false);
+                //     router.push('/');
+                // })
+                ;
         },
         userSignOut({ commit }) {
             firebase
@@ -57,11 +83,15 @@ export default new Vuex.Store({
                 .then(() => {
                     commit('setUser', null);
                     commit('setIsAuthenticated', false);
+                    commit('resetPhotoUrl');
+                    commit('resetDisplayName');
                     router.push('/');
                 })
                 .catch(() => {
                     commit('setUser', null);
                     commit('setIsAuthenticated', false);
+                    commit('resetPhotoUrl');
+                    commit('resetDisplayName');
                     router.push('/');
                 });
         }                
@@ -69,11 +99,20 @@ export default new Vuex.Store({
     getters: {
         isAuthenticated(state) {
             return state.user !== null && state.user !== undefined;
-        }
+        },
+        authenticatedUser(state) {
+            return state.user;
+        },
+        userPhotoUrl(state) {
+            return state.photoUrl;
+        },
+        userDisplayName(state) {
+            return state.displayName;
+        },
     },
 });
 
-function updateUserProfile(displayName, photoFile){
+function updateUserProfile(store, displayName, direction, photoFile){
     firebase.auth().onAuthStateChanged(function(user){
         if (user) {
             // var user = firebase.auth().currentUser;
@@ -93,10 +132,24 @@ function updateUserProfile(displayName, photoFile){
                     // For instance, get the download URL: https://firebasestorage.googleapis.com/...
                     uploadTask.snapshot.ref.getDownloadURL().then(function(downloadURL) {
                         photoUrl = downloadURL;
-                        user.updateProfile({
+                        //------------- Store user information in authentication ----------------
+                        // user.updateProfile({
+                        //     displayName: displayName,
+                        //     photoURL: photoUrl
+                        // });    
+                        //------------- Store user information in database collection ------------
+                        const userInfo = {
                             displayName: displayName,
-                            photoURL: photoUrl
-                        });    
+                            direction: direction,
+                            photoURL: photoUrl,
+                            uid: user.uid
+                        }
+                        db.collection("users").doc(user.uid).set(userInfo).then();
+                        
+                        store.dispatch('userInfoComplete', {
+                            photoUrl: photoUrl,
+                            displayName: displayName
+                        });
                     });
                 });
     
@@ -116,6 +169,24 @@ function updateUserProfile(displayName, photoFile){
             
         } else {
             // No user is signed in.
+        }
+    });
+}
+
+function queryUserProfile(store) {
+    firebase.auth().onAuthStateChanged(function(user){
+        if (user) {
+            var docRef = db.collection("users").doc(user.uid);
+            docRef.get().then( function(doc) {
+                store.dispatch('userInfoComplete', {
+                    photoUrl: doc.data().photoURL,
+                    displayName: doc.data().displayName
+                });
+            }).catch( function(error) {
+                store.dispatch('userInfoClear');
+            });            
+        } else {
+            store.dispatch('userInfoClear');
         }
     });
 }

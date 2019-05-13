@@ -39,11 +39,11 @@
             <v-layout column align-center>
                 <v-flex class="mt-5">
                     <v-avatar size="100">
-                        <img :src="getProfilePhotoUrl()">
+                        <img :src="userPhotoUrl">
                     </v-avatar>
 
                     <p class="white--text subheading mt-1 text-xs-center">
-                        {{getProfileName()}}
+                        {{userDisplayName}}
                     </p>
                 </v-flex>
                 <v-flex class="mt-4 mb-3">
@@ -67,6 +67,7 @@
 <script>
 import Popup from './Popup'
 import firebase from 'firebase'
+import db from '@/fb'
 export default {
     components: { Popup },
     data(){
@@ -85,44 +86,73 @@ export default {
         isAuthenticated() {
             return this.$store.getters.isAuthenticated;
         },
-
+        userPhotoUrl() {
+            return this.$store.getters.userPhotoUrl;
+        },
+        userDisplayName() {
+            return this.$store.getters.userDisplayName;
+        }
     },
     methods: {
         logout() {
             this.$store.dispatch('userSignOut');
         },
-        getProfilePhotoUrl() {
-            var profileSrc = "";
-            if(this.isAuthenticated){
-                var user = firebase.auth().currentUser;
-                if (user != null) {
-                    if (user.photoURL != "" && user.photoURL != null) {
-                        profileSrc = user.photoURL;
-                    } else {
-                        profileSrc = "profile_default.png";
-                    }
-                } else {
-                    profileSrc =  "profile_default.png";
-                }
-            } else {
-                profileSrc = "profile_default.png";
-            }
-            return profileSrc;
+        getUserData(uid) {
+            var docRef = db.collection("users").doc(uid);
+            docRef.get().then( function(doc) {
+                 return doc.data();
+            }).catch( function(error) {
+                return null;
+            });
         },
-        getProfileName() {
-            var displayName = "";
-            if(this.isAuthenticated){
-                var user = firebase.auth().currentUser;
-                if(user != null){
-                    displayName = user.displayName;
-                } else {
-                    displayName = "Visitor";
-                }
-            } else {
-                displayName = "Guest";
-            }
-            return displayName;
-        }                        
+        // getProfilePhotoUrl() {
+        //     var profileSrc = "";
+        //     if(this.isAuthenticated){
+        //         var user = firebase.auth().currentUser;
+        //         if (user != null) {
+        //             // ---------------- Authentication method -------------------
+        //             // if (user.photoURL != "" && user.photoURL != null) {
+        //             //     profileSrc = user.photoURL;
+        //             // } else {
+        //             //     profileSrc = "profile_default.png";
+        //             // }
+        //             // ---------------- Database method -------------------
+        //             var userData = this.getUserData(user.uid);
+        //             if(userData != null) {
+        //                 profileSrc = userData.photoURL;
+        //             }
+        //         } else {
+        //             profileSrc =  "profile_default.png";
+        //         }
+        //     } else {
+        //         profileSrc = "profile_default.png";
+        //     }
+        //     return profileSrc;
+        // },
+        // getProfileName() {
+        //     var displayName = "";
+        //     // if(this.isAuthenticated){
+        //     //     var user = firebase.auth().currentUser;
+        //     //     if(user != null){
+        //     //         // ---------------- Authentication method -------------------
+        //     //         // displayName = user.displayName;
+        //     //         // ---------------- Database method -------------------
+        //     //         var docRef = db.collection("users").doc(user.uid);
+        //     //         docRef.get().then( doc => {
+        //     //             if (doc.exist){
+        //     //                 displayName = doc.data().displayName;
+        //     //             } else {
+        //     //                 displayName = "Visitor";
+        //     //             }
+        //     //         });
+        //     //     } else {
+        //     //         displayName = "Visitor";
+        //     //     }
+        //     // } else {
+        //     //     displayName = "Guest";
+        //     // }
+        //     return displayName;
+        // }                        
     }
 
 }</script>

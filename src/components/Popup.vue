@@ -1,5 +1,5 @@
 <template>
-    <v-dialog max-width="600px" v-model="dialog">
+    <v-dialog v-if="isAuthenticated" max-width="600px" v-model="dialog">
         <v-btn flat slot="activator" class="success">Add new study</v-btn>
         <v-card>
             <v-card-title>
@@ -9,7 +9,7 @@
                 <v-form class="px-3" ref="form">
                     <v-text-field label="Title" v-model="title" prepend-icon="folder" :rules="inputRules"></v-text-field>
                     <v-textarea label="Description" v-model="content" prepend-icon="pencil" :rules="inputRules"></v-textarea>
-                    <v-text-field label="Compensation" v-model="compensation" prepend-icon="money" :rules="inputRules"></v-text-field>
+                    <v-text-field label="Compensation" v-model="compensation" prefix="$" suffix="/hour" placeholder="30" prepend-icon="money" :rules="compRules"></v-text-field>
                     <v-menu>
                         <v-text-field :rules="inputRules" :value="formattedDate" slot="activator" label="Date" prepend-icon="date_range"></v-text-field>
                         <v-date-picker v-model="date"></v-date-picker>
@@ -27,6 +27,7 @@
 <script>
 import format from 'date-fns/format'
 import db from '@/fb'
+import firebase from 'firebase'
 
 export default {
     data() {
@@ -38,21 +39,26 @@ export default {
             inputRules:[
                 v => v.length >= 3 || 'Minimum length is 3 characters'
             ],
+            compRules:[
+                v => v.length >=1 || 'At least 1-digit number'
+            ],
             loading: false,
             dialog: false
         }
     },
     methods: {
         submit() {
-            if(this.$refs.form.validate()){
+            var user = this.authenticatedUser();
+            if(this.$refs.form.validate() && user!==null){
                 this.loading = true;
 
                 const study = {
                     title: this.title,
                     content: this.content,
                     date: format(this.date, 'Do MMM YYYY'),
-                    group: 'Runjia Zhao',
-                    compensation: 'high',
+                    group: this.$store.getters.userDisplayName,
+                    compensation: Number(this.compensation),
+                    uid: user.uid
                 }
 
                 db.collection('studies').add(study).then( () => {
@@ -61,12 +67,23 @@ export default {
                     this.$emit('studyAdded')
                 })
             }
+        },
+        authenticatedUser() {
+            var user = firebase.auth().currentUser;
+            if (user !== null && user !== undefined) {
+                return user;
+            } else {
+                return null;
+            }
         }
     },
     computed: {
         formattedDate(){
             return this.date ? format(this.date,'Do MMM YYYY') : ''
-        }
-    }
+        },
+        isAuthenticated() {
+            return this.$store.getters.isAuthenticated;
+        },
+    },
 }
 </script>
